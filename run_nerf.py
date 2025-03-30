@@ -17,6 +17,8 @@ from load_llff import load_llff_data
 from load_deepvoxels import load_dv_data
 from load_blender import load_blender_data
 from load_LINEMOD import load_LINEMOD_data
+from torch.utils.tensorboard import SummaryWriter
+
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -456,6 +458,8 @@ def config_parser():
                         help='do not reload weights from saved ckpt')
     parser.add_argument("--ft_path", type=str, default=None, 
                         help='specific weights npy file to reload for coarse network')
+    parser.add_argument("--N_iters", type=int, default=200000, 
+                        help="total training epoch")
 
     # rendering options
     parser.add_argument("--N_samples", type=int, default=64, 
@@ -698,14 +702,14 @@ def train():
         rays_rgb = torch.Tensor(rays_rgb).to(device)
 
 
-    N_iters = 200000 + 1
+    N_iters = args.N_iters + 1
     print('Begin')
     print('TRAIN views are', i_train)
     print('TEST views are', i_test)
     print('VAL views are', i_val)
 
     # Summary writers
-    # writer = SummaryWriter(os.path.join(basedir, 'summaries', expname))
+    writer = SummaryWriter(os.path.join(basedir, 'summaries', expname))
     
     start = start + 1
     for i in trange(start, N_iters):
@@ -827,6 +831,36 @@ def train():
     
         if i%args.i_print==0:
             tqdm.write(f"[TRAIN] Iter: {i} Loss: {loss.item()}  PSNR: {psnr.item()}")
+            writer.add_scalar("train/loss", loss.item(), i)
+            writer.add_scalar("train/psnr", psnr.item(), i)
+            if args.N_importance > 0 and 'psnr0' in locals():
+                writer.add_scalar("train/psnr0", psnr0.item(), i)
+
+            # Histogram of transparency
+            if 'trans' in locals():
+                writer.add_histogram("train/trans", trans, i)
+
+            if i % args.i_img == 0:
+                img_i = np.random.choice(i_val)
+                target = images[img_i]
+                pose = poses[img_i, :3, :4]
+                with torch.no_grad():
+                    rgb, disp, acc, extras = render(
+                        H, W, focal, chunk=args.chunk, c2w=pose, **render_kwargs_test
+                    )
+                psnr = mse2psnr(img2mse(rgb, target))
+
+                # Image logs
+                writer.add_scalar("val/psnr_holdout", psnr.item(), i)
+                writer.add_image("val/rgb", to8b(rgb).transpose(2, 0, 1), i)
+                writer.add_image("val/disp", disp[None], i)
+                writer.add_image("val/acc", acc[None], i)
+                writer.add_image("val/target", to8b(target).transpose(2, 0, 1), i)
+
+                if args.N_importance > 0 and 'rgb0' in extras:
+                    writer.add_image("extras/rgb0", to8b(extras['rgb0']).transpose(2, 0, 1), i)
+                    writer.add_image("extras/disp0", extras['disp0'][None], i)
+                    writer.add_image("extras/z_std", extras['z_std'][None], i)
         """
             print(expname, i, psnr.numpy(), loss.numpy(), global_step.numpy())
             print('iter time {:.05f}'.format(dt))
@@ -870,6 +904,7 @@ def train():
         """
 
         global_step += 1
+    writer.close()
 
 
 if __name__=='__main__':
