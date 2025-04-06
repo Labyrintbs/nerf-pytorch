@@ -22,8 +22,19 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-np.random.seed(0)
+def set_seed(seed=0):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    print(f"Seed set to {seed}")
 DEBUG = False
+
 
 
 def batchify(fn, chunk):
@@ -532,6 +543,10 @@ def config_parser():
     parser.add_argument("--i_video",   type=int, default=50000, 
                         help='frequency of render_poses video saving')
 
+    # additional experimental settings
+    parser.add_argument("--seed", type=int, default=0,
+                    help='random seed for reproducibility')
+
     return parser
 
 
@@ -539,6 +554,7 @@ def train():
 
     parser = config_parser()
     args = parser.parse_args()
+    set_seed(args.seed)
 
     # Load data
     K = None
