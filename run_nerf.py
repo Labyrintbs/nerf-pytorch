@@ -560,7 +560,8 @@ def config_parser():
     parser.add_argument('--use_custom_camera', action='store_true', help='Use custom camera view for video generation')
     parser.add_argument('--radius_range', type=str, default="", help="e.g. '[2.0, 6.0, 0.1]'")
     parser.add_argument('--theta_range', type=str, default="", help="e.g. '[-180, 180, 10]'")
-
+    parser.add_argument("--near", type=float, default=2.0, help='near bound for volume rendering')
+    parser.add_argument("--far", type=float, default=6.0, help='far bound for volume rendering')
 
 
     return parser
@@ -617,8 +618,8 @@ def train():
         print('Loaded blender', images.shape, render_poses.shape, hwf, args.datadir)
         i_train, i_val, i_test = i_split
 
-        near = 2.
-        far = 6.
+        near = args.near #2.
+        far = args.far #6.
 
         if args.white_bkgd:
             images = images[...,:3]*images[...,-1:] + (1.-images[...,-1:])
