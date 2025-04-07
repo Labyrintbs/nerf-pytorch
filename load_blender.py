@@ -34,7 +34,7 @@ def pose_spherical(theta, phi, radius):
     return c2w
 
 
-def load_blender_data(basedir, half_res=False, testskip=1):
+def load_blender_data(basedir, half_res=False, testskip=1, theta_range=[], radius_range=[]):
     splits = ['train', 'val', 'test']
     metas = {}
     for s in splits:
@@ -72,7 +72,17 @@ def load_blender_data(basedir, half_res=False, testskip=1):
     camera_angle_x = float(meta['camera_angle_x'])
     focal = .5 * W / np.tan(.5 * camera_angle_x)
     
-    render_poses = torch.stack([pose_spherical(angle, -30.0, 4.0) for angle in np.linspace(-180,180,40+1)[:-1]], 0)
+    if theta_range:
+        thetas = np.arange(*theta_range)
+        render_poses = torch.stack([pose_spherical(theta, -30.0, 4.0) for theta in thetas], 0)
+        print(f"[INFO] Using custom theta_range: {theta_range}")
+    elif radius_range :
+        radius_list = np.arange(*radius_range)
+        render_poses = torch.stack([pose_spherical(0, -30.0, radius) for radius in radius_list], 0)
+        print(f"[INFO] Using custom radius_range: {radius_range}")
+    else:
+        print("[INFO] Using default 360° rendering poses.")
+        render_poses = torch.stack([pose_spherical(angle, -30.0, 4.0) for angle in np.linspace(-180,180,40+1)[:-1]], 0)
     
     if half_res:
         H = H//2

@@ -19,6 +19,9 @@ from load_blender import load_blender_data
 from load_LINEMOD import load_LINEMOD_data
 from torch.utils.tensorboard import SummaryWriter
 
+import ast
+
+
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -430,6 +433,14 @@ def render_rays(ray_batch,
 
     return ret
 
+def parse_range(arg):
+    if isinstance(arg, str):
+        try:
+            return ast.literal_eval(arg)
+        except Exception as e:
+            print(f"Failed to parse range from string: {arg}")
+            raise e
+    return arg
 
 def config_parser():
 
@@ -546,6 +557,11 @@ def config_parser():
     # additional experimental settings
     parser.add_argument("--seed", type=int, default=0,
                     help='random seed for reproducibility')
+    parser.add_argument('--use_custom_camera', action='store_true', help='Use custom camera view for video generation')
+    parser.add_argument('--radius_range', type=str, default="", help="e.g. '[2.0, 6.0, 0.1]'")
+    parser.add_argument('--theta_range', type=str, default="", help="e.g. '[-180, 180, 10]'")
+
+
 
     return parser
 
@@ -587,7 +603,17 @@ def train():
         print('NEAR FAR', near, far)
 
     elif args.dataset_type == 'blender':
-        images, poses, render_poses, hwf, i_split = load_blender_data(args.datadir, args.half_res, args.testskip)
+        if args.use_custom_camera:
+            radius_range = parse_range(args.radius_range) if args.radius_range else []
+            theta_range = parse_range(args.theta_range) if args.theta_range else []
+
+            if radius_range:
+                print(f"Use custom radius range {radius_range}")
+            if theta_range:
+                print(f"Use custom theta range {theta_range}")
+            images, poses, render_poses, hwf, i_split = load_blender_data(args.datadir, args.half_res, args.testskip, theta_range, radius_range)
+        else:
+            images, poses, render_poses, hwf, i_split = load_blender_data(args.datadir, args.half_res, args.testskip)
         print('Loaded blender', images.shape, render_poses.shape, hwf, args.datadir)
         i_train, i_val, i_test = i_split
 
