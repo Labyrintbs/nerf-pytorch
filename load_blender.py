@@ -74,6 +74,7 @@ def load_blender_data(basedir, half_res=False, testskip=1, theta_range=[], radiu
     
 
     if radius_range and theta_range:
+        render_poses = []
         radius_list = np.arange(*radius_range)
         theta_list = np.arange(*theta_range)
         for r in radius_list:
