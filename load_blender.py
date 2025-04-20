@@ -80,6 +80,7 @@ def load_blender_data(basedir, half_res=False, testskip=1, theta_range=[], radiu
         for r in radius_list:
             render_poses_block = [pose_spherical(theta, -30.0, r) for theta in theta_list]
             render_poses.extend(render_poses_block)
+        render_poses = torch.stack(render_poses, 0)
         print(f"[INFO] Generated {len(radius_list)} x {len(theta_list)} poses with radius_range and theta_range")
     elif theta_range:
         thetas = np.arange(*theta_range)
