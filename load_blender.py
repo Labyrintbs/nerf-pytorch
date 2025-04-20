@@ -72,9 +72,17 @@ def load_blender_data(basedir, half_res=False, testskip=1, theta_range=[], radiu
     camera_angle_x = float(meta['camera_angle_x'])
     focal = .5 * W / np.tan(.5 * camera_angle_x)
     
-    if theta_range:
+
+    if radius_range and theta_range:
+        radius_list = np.arange(*radius_range)
+        theta_list = np.arange(*theta_range)
+        for r in radius_list:
+            render_poses_block = [pose_spherical(theta, -30.0, r) for theta in theta_list]
+            render_poses.extend(render_poses_block)
+        print(f"[INFO] Generated {len(radius_list)} x {len(theta_list)} poses with radius_range and theta_range")
+    elif theta_range:
         thetas = np.arange(*theta_range)
-        render_poses = torch.stack([pose_spherical(theta, -30.0, 4.0) for theta in thetas], 0)
+        render_poses = torch.stack([pose_spherical(theta, -30.0, 10.0) for theta in thetas], 0)
         print(f"[INFO] Using custom theta_range: {theta_range}")
     elif radius_range :
         radius_list = np.arange(*radius_range)
