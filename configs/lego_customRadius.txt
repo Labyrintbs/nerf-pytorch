@@ -1,4 +1,4 @@
-expname = blender_paper_lego_2025_0421
+expname = blender_paper_lego-20250407-CustomRadius
 basedir = ./logs
 datadir = ./data/nerf_synthetic/lego
 dataset_type = blender
@@ -12,6 +12,11 @@ lrate_decay = 500
 N_samples = 64
 N_importance = 128
 N_rand = 1024
+use_custom_camera = True
+radius_range = "[2.0, 6.0, 0.1]"
+theta_range = "[-180, 180, 5]"
+ft_path = /users/Etu0/21400500/IG3D/nerf-pytorch/logs/pretrain_model/lego_test/200000.tar
+render_only = True
 
 precrop_iters = 500
 precrop_frac = 0.5

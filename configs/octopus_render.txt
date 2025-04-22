@@ -1,0 +1,20 @@
+expname = blender_octopus-20250421-near-2-far-6-renderRadius-10
+basedir = ./logs
+datadir = ./data/nerf_synthetic/octopus
+dataset_type = blender
+
+no_batching = True
+
+use_viewdirs = True
+white_bkgd = True
+lrate_decay = 500
+
+N_samples = 64
+N_importance = 128
+N_rand = 1024
+near=8
+far=12
+
+use_custom_camera = True
+ft_path = /users/Etu0/21400500/IG3D/nerf-pytorch/logs/blender_octopus-20250407/200000.tar
+

@@ -1,17 +1,18 @@
-expname = blender_paper_lego_2025_0421
+expname = blender_paper_lego-20250406-noView
 basedir = ./logs
-datadir = ./data/nerf_synthetic/lego
+datadir = ./data/nerf_synthetic/lego1
 dataset_type = blender
 
 no_batching = True
 
-use_viewdirs = True
+use_viewdirs = False
 white_bkgd = True
 lrate_decay = 500
 
 N_samples = 64
 N_importance = 128
 N_rand = 1024
+i_embed = -1
 
 precrop_iters = 500
 precrop_frac = 0.5
