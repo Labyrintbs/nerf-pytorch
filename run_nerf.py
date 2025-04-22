@@ -24,6 +24,9 @@ import ast
 
 
 
+########
+#Modification Begin 
+#########
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def set_seed(seed=0):
     random.seed(seed)
@@ -37,7 +40,9 @@ def set_seed(seed=0):
 
     print(f"Seed set to {seed}")
 DEBUG = False
-
+########
+#Modification Done
+#########
 
 
 def batchify(fn, chunk):
@@ -554,6 +559,9 @@ def config_parser():
     parser.add_argument("--i_video",   type=int, default=50000, 
                         help='frequency of render_poses video saving')
 
+    ########
+    #Modification Begin 
+    #########
     # additional experimental settings
     parser.add_argument("--seed", type=int, default=0,
                     help='random seed for reproducibility')
@@ -562,7 +570,9 @@ def config_parser():
     parser.add_argument('--theta_range', type=str, default="", help="e.g. '[-180, 180, 10]'")
     parser.add_argument("--near", type=float, default=2.0, help='near bound for volume rendering')
     parser.add_argument("--far", type=float, default=6.0, help='far bound for volume rendering')
-
+    ########
+    #Modification Done
+    #########
 
     return parser
 
@@ -603,6 +613,9 @@ def train():
             far = 1.
         print('NEAR FAR', near, far)
 
+    ########
+    #Modification Begin
+    #########
     elif args.dataset_type == 'blender':
         if args.use_custom_camera:
             radius_range = parse_range(args.radius_range) if args.radius_range else []
@@ -625,7 +638,10 @@ def train():
             images = images[...,:3]*images[...,-1:] + (1.-images[...,-1:])
         else:
             images = images[...,:3]
-
+    ########
+    #Modification Done
+    #########
+            
     elif args.dataset_type == 'LINEMOD':
         images, poses, render_poses, hwf, K, i_split, near, far = load_LINEMOD_data(args.datadir, args.half_res, args.testskip)
         print(f'Loaded LINEMOD, images shape: {images.shape}, hwf: {hwf}, K: {K}')

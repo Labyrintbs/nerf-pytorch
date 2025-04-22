@@ -73,6 +73,9 @@ def load_blender_data(basedir, half_res=False, testskip=1, theta_range=[], radiu
     focal = .5 * W / np.tan(.5 * camera_angle_x)
     
 
+    ########
+    #Modification Begin
+    #########
     if radius_range and theta_range:
         render_poses = []
         radius_list = np.arange(*radius_range)
@@ -94,6 +97,9 @@ def load_blender_data(basedir, half_res=False, testskip=1, theta_range=[], radiu
         print("[INFO] Using default 360° rendering poses.")
         render_poses = torch.stack([pose_spherical(angle, -30.0, 4.0) for angle in np.linspace(-180,180,40+1)[:-1]], 0)
     
+    ########
+    #Modification Done
+    #########
     if half_res:
         H = H//2
         W = W//2
